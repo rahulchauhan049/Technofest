@@ -9,17 +9,16 @@ const app = dialogflow({
     debug: true
 });
 var suggestion;
-var events = [];
+var events = ['Quit'];
 
 app.intent("events", conv => {
     return db.ref("events/").once("value", snapshot => {
         const data = snapshot.val();
-        var events = [];
         for (let x in data){
             events.push(`${data[x]["name"]}`);
 
         }
-        conv.ask(`The events of Technofest are : ${events.toString()}`);
+        conv.ask(`There are many events in technofest such as : ${events.toString()}.  \nClick below suggestions to know more.`);
         conv.ask(new Suggestions(events));
         });
     });
@@ -32,40 +31,49 @@ app.intent('singleEvent', conv => {
         const id = data["EventId"][rawInput]["id"];
         conv.ask(`Here's some detail about ${rawInput}`);
         conv.ask(new BasicCard({
-            text: `${data["events"][id]["name"]}`, 
-            subtitle: 'This is a subtitle',
-            title: 'Title: this is a title',
+            subtitle: `The event is on ${data["events"][id]["date"]}`,
+            text: `${data["events"][id]["description"]}  \n**venue** : ${data["events"][id]["venue"]}  \nThe Registration will end on ${data["events"][id]["registration_ends"]}`, 
+            title: `${data["events"][id]["name"]}`,
             display: 'CROPPED',
         }));
+        conv.ask(new Suggestions(events));
     });
 });
 
 
 app.intent("option", (conv, input, option) => {
     if(option === 'events'){
-        events(conv);
+        return db.ref("events/").once("value", snapshot => {
+            const data = snapshot.val();
+            for (let x in data){
+                events.push(`${data[x]["name"]}`);
+    
+            }
+            conv.ask(`There are many events in technofest such as : ${events.toString()}.  \nClick below suggestions to know more.`);
+            conv.ask(new Suggestions(events));
+            });
     }else if(option === 'contact'){
-        contact(conv);
+        conv.ask(new BasicCard({
+            text: `Feel free to contact us.  \n**swetank** : 7042435242  \n**Honey** : 9821443576`,
+            title: 'Contact us',
+            buttons: new Button({
+              title: 'Facebook',
+              url: 'https://www.facebook.com/technojam.scse/',
+            }),
+            image: new Image({
+              url: 'https://www.efi.com/library/efi/images/banners/about_efi/contact_company_banner.jpg?h=280&w=980',
+              alt: 'Contact us',
+            }),
+            display: 'CROPPED',
+          }));
     }
 });
 
 
 
 //Functions..............................................................................................
-//Event function
-function events(conv){
-    return db.ref("events/").once("value", snapshot => {
-        const data = snapshot.val();
-        
-        conv.ask(`this is my ${data["2edb2db9aae733dd5c201a588e05f4d3"]["contact_name"]}`)
 
-    });
-}
 
-function contact(conv){
-    suggestion = ['a'];
-    conv.ask(`you choose contact`);
-}
 
 exports.googleAction = functions.https.onRequest(app);
  
