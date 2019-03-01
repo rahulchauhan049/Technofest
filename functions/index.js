@@ -9,33 +9,42 @@ const app = dialogflow({
     debug: true
 });
 var suggestion;
+let suggest
 var events = [];
 //............................................................................................................
 
 //About Technofest
-app.intent('aboutTechnofest', conv => {
+app.intent('about', conv => {
     const category = (conv.parameters['about']);
     return db.ref('about').once("value", snapshot => {
         const data = snapshot.val();
         conv.ask(new SimpleResponse({
-            speech: `${data[toString(category)]["speech"]}`,
-            text: `${data[toString(category)][`upperText`]}`,
+            speech: `${data[category]["speech"]}`,
+            text: `${data[category][`upperText`]}`,
           }));
         // Create a basic card
         conv.ask(new BasicCard({
-            text: `${data[toString(category)]['text']}`,
-            subtitle: `${data[toString(category)]['subtitle']}`,
-            title: `${data[toString(category)]['title']}`,
+            text: `${data[category]['text']}`,
+            subtitle: `${data[category]['subtitle']}`,
+            title: `${data[category]['title']}`,
             buttons: new Button({
                title: 'Website',
-               url: `${data[toString(category)]['websiteUrl']}`,
+               url: `${data[category]['websiteUrl']}`,
             }),
             image: new Image({
-               url: `${data[toString(category)]['imageUrl']}`,
+               url: `${data[category]['imageUrl']}`,
                alt: `Technofest`,
             }),
             display: 'CROPPED',
         }));
+        if(category === 'technojam'){
+            suggest = ['Quit', 'Technofest', 'Events', 'Galgotias', 'Contact us'];
+        }else if(category === 'technofest'){
+            suggest = ['Quit', 'Events', 'Contact us'];
+        }else if(category === 'Galgotias'){
+            suggest = ['Quit', 'Technofest', 'Events', 'Technojam', 'Contact us'];
+        }
+        conv.ask(new Suggestions(suggest));
     });   
 });
 
@@ -128,6 +137,81 @@ app.intent("option", (conv, input, option) => {
           }));
           events.unshift('Quit');
           conv.ask(new Suggestions(events));
+    }else if(option === 'technojam'){
+        return db.ref('about').once("value", snapshot => {
+            const data = snapshot.val();
+            conv.ask(new SimpleResponse({
+                speech: `${data["technojam"]["speech"]}`,
+                text: `${data["technojam"][`upperText`]}`,
+              }));
+            // Create a basic card
+            conv.ask(new BasicCard({
+                text: `${data["technojam"]['text']}`,
+                subtitle: `${data["technojam"]['subtitle']}`,
+                title: `${data["technojam"]['title']}`,
+                buttons: new Button({
+                   title: 'Website',
+                   url: `${data["technojam"]['websiteUrl']}`,
+                }),
+                image: new Image({
+                   url: `${data["technojam"]['imageUrl']}`,
+                   alt: `TechnoJam`,
+                }),
+                display: 'CROPPED',
+            }));
+            suggest = ['Quit', 'Technofest', 'Events', 'Galgotias', 'Contact us'];
+            conv.ask(new Suggestions(suggest));
+        }); 
+    } else if(option === 'technofest'){
+        return db.ref('about').once("value", snapshot => {
+            const data = snapshot.val();
+            conv.ask(new SimpleResponse({
+                speech: `${data["technofest"]["speech"]}`,
+                text: `${data["technofest"][`upperText`]}`,
+              }));
+            // Create a basic card
+            conv.ask(new BasicCard({
+                text: `${data["technofest"]['text']}`,
+                subtitle: `${data["technofest"]['subtitle']}`,
+                title: `${data["technofest"]['title']}`,
+                buttons: new Button({
+                   title: 'Website',
+                   url: `${data["technofest"]['websiteUrl']}`,
+                }),
+                image: new Image({
+                   url: `${data["technofest"]['imageUrl']}`,
+                   alt: `Technofest`,
+                }),
+                display: 'CROPPED',
+            }));
+            suggest = ['Quit', 'Events', 'Technojam', 'Galgotias', 'Contact us'];
+            conv.ask(new Suggestions(suggest));
+        });
+    } else if(option === 'galgotias'){
+        return db.ref('about').once("value", snapshot => {
+            const data = snapshot.val();
+            conv.ask(new SimpleResponse({
+                speech: `${data["galgotias"]["speech"]}`,
+                text: `${data["galgotias"][`upperText`]}`,
+              }));
+            // Create a basic card
+            conv.ask(new BasicCard({
+                text: `${data["galgotias"]['text']}`,
+                subtitle: `${data["galgotias"]['subtitle']}`,
+                title: `${data["galgotias"]['title']}`,
+                buttons: new Button({
+                   title: 'Website',
+                   url: `${data["galgotias"]['websiteUrl']}`,
+                }),
+                image: new Image({
+                   url: `${data["galgotias"]['imageUrl']}`,
+                   alt: `Galgotias`,
+                }),
+                display: 'CROPPED',
+            }));
+            suggest = ['Quit', 'Technofest', 'Events', 'Technojam', 'Contact us'];
+            conv.ask(new Suggestions(suggest));
+        });
     }
 });
 
