@@ -12,6 +12,9 @@ const app = dialogflow({
 var suggestion;
 let suggest
 var events = [];
+const payload;
+var eventId = [];
+var eventInfo = [];
 //............................................................................................................
 //Sign in user................................................................................................
 
@@ -24,12 +27,41 @@ app.intent('Start Signin', (conv) => {
 
 app.intent('Get Signin', (conv, params, signin) => {
   if (signin.status === 'OK') {
-    const payload = conv.user.access.token;
-    conv.ask(`${payload}`);
+    payload = conv.user.access.token;
+    conv.ask(`You have successfully logged in. What you want to do now?`);
+    conv.ask('Quit', 'Regestered Events');
   } else {
     conv.ask(`I won't be able to save your data, but what do you want to do next?`);
   }
 });
+
+//............................................................................................................
+//Show user his registered events
+app.intent("userDetail", conv => {
+    if(signin.status === 'ok'){
+        return db.ref('/').once("value", snapshot => {
+            const data = snapshot.val();
+            const registeredEvents = data["registration"][payload]["events"];
+            for (let x in registeredEvents){
+                eventId.push(`${data["registration"][payload]["events"][x]["confirm"]}`);
+            }   
+            for(let x in eventId){
+                eventInfo.push(`**Name** : ${data[events[x][name]]}`);
+            }
+            
+
+            conv.ask(new SimpleResponse({
+                speech: `You have registered in the Following events...`,
+                text: `Click on suggestions below to know more about each events..  \n${eventInfo}`,
+              }));
+        });
+    }
+    else{
+        conv.ask('You need you sign in first.');
+        conv.ask(new SignIn('To get your account details'));
+    }
+});
+
 
 
 //About Technofest............................................................................................
