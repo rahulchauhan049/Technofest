@@ -4,16 +4,44 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 admin.initializeApp();
 const db = admin.database();
-const { dialogflow, Suggestions, BasicCard, Button, Image, SimpleResponse } = require('actions-on-google');
+const { dialogflow, Suggestions, BasicCard, Button, Image, SimpleResponse, SignIn } = require('actions-on-google');
 const app = dialogflow({
+    clientId: "636159713123-41ab6or5hf86ouihqlqr58a5fvpthfg1.apps.googleusercontent.com",
     debug: true
 });
 var suggestion;
 let suggest
 var events = [];
 //............................................................................................................
+//Sign in user................................................................................................
 
-//About Technofest
+// Intent that starts the account linking flow.
+app.intent('Start Signin', (conv) => {
+    conv.ask(new SignIn('To get your account details'));
+  });
+
+
+
+app.intent('Get Signin', (conv, params, signin) => {
+  if (signin.status === 'OK') {
+    const payload = conv.user.profile.payload.;
+    conv.ask(`${payload}`);
+  } else {
+    conv.ask(`I won't be able to save your data, but what do you want to do next?`);
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+//About Technofest............................................................................................
 app.intent('about', conv => {
     const category = (conv.parameters['about']);
     return db.ref('about').once("value", snapshot => {

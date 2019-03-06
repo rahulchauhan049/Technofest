@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+
+<!-- Added by HTTrack -->
+<meta http-equiv="content-type" content="text/html;charset=utf-8" /><!-- /Added by HTTrack -->
+
+<head>
+  <meta charset="UTF-8">
+  <title>Techno Fest</title>
+
+  <meta name="theme-color" content="#5b2354">
+  <script src="firebase.js"></script>
+  <script>
+    // Initialize Firebase
+    var config = {
+      apiKey: "AIzaSyDpez13rmK8zbZ4M0NgMKRDds_uSmYI2NQ",
+      authDomain: "login-477f3.firebaseapp.com",
+      databaseURL: "https://login-477f3.firebaseio.com",
+      projectId: "login-477f3",
+      storageBucket: "login-477f3.appspot.com",
+      messagingSenderId: "906447296175"
+    };
+    firebase.initializeApp(config);
+  </script>
+  <script>
+    var CLIENT_ID = '906447296175-qd396per9mdu4uudojpjqkfakunl6i6k.apps.googleusercontent.com';
+  </script>
+  <link href="style30f4.css?v=3" rel="stylesheet" type="text/css" media="screen" />
+  <script src="firebaseui.js"></script>
+  <link href="https://fonts.googleapis.com/css?family=Nova+Flat|Source+Code+Pro" rel="stylesheet">
+
+  <link type="text/css" rel="stylesheet" href="firebaseui.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body id="linearBg1">
+  <div class="logout" id="sign-out">
+
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+      <path
+        d="M400 54.1c63 45 104 118.6 104 201.9 0 136.8-110.8 247.7-247.5 248C120 504.3 8.2 393 8 256.4 7.9 173.1 48.9 99.3 111.8 54.2c11.7-8.3 28-4.8 35 7.7L162.6 90c5.9 10.5 3.1 23.8-6.6 31-41.5 30.8-68 79.6-68 134.9-.1 92.3 74.5 168.1 168 168.1 91.6 0 168.6-74.2 168-169.1-.3-51.8-24.7-101.8-68.1-134-9.7-7.2-12.4-20.5-6.5-30.9l15.8-28.1c7-12.4 23.2-16.1 34.8-7.8zM296 264V24c0-13.3-10.7-24-24-24h-32c-13.3 0-24 10.7-24 24v240c0 13.3 10.7 24 24 24h32c13.3 0 24-10.7 24-24z" />
+      </svg>
+  </div>
+  <div class="container">
+    <div id="loading"></div>
+    <div id="loaded" class="hidden">
+      <div id="main">
+        <div id="user-signed-in" class="hidden">
+
+          <div id="user-info" class="raise">
+
+            <div id="photo-container">
+              <img id="photo">
+            </div>
+            <div id="name"></div>
+            <div id="login-text"> You have been Successfully Logged in.</div>
+            <div id="email"> </div>
+            <div id="phone"></div>
+            <div class="clearfix"></div>
+          </div>
+
+          <div id="continue-button">
+            <button class="btn" id="redirectToGoogle">Click here to Continue</button>
+            <!-- <button class="btn" id="delete-account">Delete account</button> -->
+          </div>
+        </div>
+        <div id="user-signed-out" class="hidden">
+            <div id="login_div" class="main-div">
+                <h3 class="text">Techno Fest Login</h3>
+                <input type="email" placeholder="Email..." id="email_field" />
+                <input type="password" placeholder="Password..." id="password_field" />
+            
+                <button onclick="login()" class="btn-login">Login to Account</button>
+              </div>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="app.js"></script>
+</body>
+
+
+
+</html>
