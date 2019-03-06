@@ -24,21 +24,12 @@ app.intent('Start Signin', (conv) => {
 
 app.intent('Get Signin', (conv, params, signin) => {
   if (signin.status === 'OK') {
-    const payload = conv.user.profile.payload.;
+    const payload = conv.user.access.token;
     conv.ask(`${payload}`);
   } else {
     conv.ask(`I won't be able to save your data, but what do you want to do next?`);
   }
 });
-
-
-
-
-
-
-
-
-
 
 
 //About Technofest............................................................................................
