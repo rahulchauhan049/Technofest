@@ -65,14 +65,14 @@ function redirectToGoogle() {
     if (firebase.auth().currentUser) {
 
       
-        window.location = "https://oauth-redirect.googleusercontent.com/r/login-477f3" + "#access_token=" + firebase.auth().currentUser.uid + "&token_type=bearer&state=" + state;
+        window.location = "https://oauth-redirect.googleusercontent.com/r/technofest-8b445" + "#access_token=" + firebase.auth().currentUser.uid + "&token_type=bearer&state=" + state;
     
 
     } else {
       alert("You need to be signed in!");
     }
   } else {
-    window.location = "https://assistant.google.com/services/a/uid/000000d30c7816af";
+    window.location = "https://assistant.google.com/services/a/uid/000000941e12df63";
   }
 }
 
