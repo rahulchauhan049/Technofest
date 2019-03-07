@@ -12,51 +12,64 @@ const app = dialogflow({
 var suggestion;
 let suggest
 var events = [];
-const payload;
+let payload;
 var eventId = [];
 var eventInfo = [];
+var userEventsSuggestions = [];
+
 //............................................................................................................
 //Sign in user................................................................................................
 
 // Intent that starts the account linking flow.
 app.intent('Start Signin', (conv) => {
     conv.ask(new SignIn('To get your account details'));
-  });
+});
 
 
 
 app.intent('Get Signin', (conv, params, signin) => {
-  if (signin.status === 'OK') {
-    payload = conv.user.access.token;
-    conv.ask(`You have successfully logged in. What you want to do now?`);
-    conv.ask('Quit', 'Regestered Events');
-  } else {
-    conv.ask(`I won't be able to save your data, but what do you want to do next?`);
-  }
+    if (signin.status === 'OK') {
+        payload = conv.user.access.token;
+        conv.ask(`You have successfully logged in. What you want to do now?`);
+        conv.ask('Quit', 'Regestered Events');
+    } else {
+        conv.ask(`I won't be able to save your data, but what do you want to do next?`);
+    }
 });
 
 //............................................................................................................
 //Show user his registered events
-app.intent("userDetail", conv => {
-    if(signin.status === 'ok'){
+app.intent("userDetail", (conv) => {
+    if (conv.user.access.token) {
         return db.ref('/').once("value", snapshot => {
             const data = snapshot.val();
-            const registeredEvents = data["registration"][payload]["events"];
-            for (let x in registeredEvents){
-                eventId.push(`${data["registration"][payload]["events"][x]["confirm"]}`);
-            }   
-            for(let x in eventId){
-                eventInfo.push(`**Name** : ${data[events[x][name]]}`);
-            }
+            if (!data["registration"][payload]) {
+                conv.ask("Looks like you haven't registered in any event yet.");
+                conv.ask(new Suggestions(['Quit', 'Help', 'Events']));
+            } else {
+                const registeredEvents = data["registration"][payload]["events"];
+                for (let x in registeredEvents) {
+                    eventId.push(`${data["registration"][payload]["events"][x]["confirm"]}`);
+                }
+                for (let x in eventId) {
+                    eventInfo.push(`**Name** : ${data["events"[x]["name"]]}, **Date** : ${data["events"[x]["date"]]} **From** : ${data["events"[x]["time_from"]]} **To** : ${data["events"[x]["time_to"]]}  \n`);
             
 
-            conv.ask(new SimpleResponse({
-                speech: `You have registered in the Following events...`,
-                text: `Click on suggestions below to know more about each events..  \n${eventInfo}`,
-              }));
+                }
+                for (let x in eventId){
+                    userEventsSuggestions.push(`${data["events"][x]["name"]}`);
+                }
+
+
+                conv.ask(new SimpleResponse({
+                    speech: `You have registered in the Following events...`,
+                    text: `${eventInfo}`,
+                }));
+                conv.ask(new Suggestions(userEventsSuggestions));
+            }
         });
     }
-    else{
+    else {
         conv.ask('You need you sign in first.');
         conv.ask(new SignIn('To get your account details'));
     }
@@ -72,31 +85,31 @@ app.intent('about', conv => {
         conv.ask(new SimpleResponse({
             speech: `${data[category]["speech"]}`,
             text: `${data[category][`upperText`]}`,
-          }));
+        }));
         // Create a basic card
         conv.ask(new BasicCard({
             text: `${data[category]['text']}`,
             subtitle: `${data[category]['subtitle']}`,
             title: `${data[category]['title']}`,
             buttons: new Button({
-               title: 'Website',
-               url: `${data[category]['websiteUrl']}`,
+                title: 'Website',
+                url: `${data[category]['websiteUrl']}`,
             }),
             image: new Image({
-               url: `${data[category]['imageUrl']}`,
-               alt: `Technofest`,
+                url: `${data[category]['imageUrl']}`,
+                alt: `Technofest`,
             }),
             display: 'CROPPED',
         }));
-        if(category === 'technojam'){
+        if (category === 'technojam') {
             suggest = ['Quit', 'Technofest', 'Events', 'Galgotias', 'Contact us'];
-        }else if(category === 'technofest'){
+        } else if (category === 'technofest') {
             suggest = ['Quit', 'Events', 'Contact us'];
-        }else if(category === 'Galgotias'){
+        } else if (category === 'Galgotias') {
             suggest = ['Quit', 'Technofest', 'Events', 'Technojam', 'Contact us'];
         }
         conv.ask(new Suggestions(suggest));
-    });   
+    });
 });
 
 
@@ -108,15 +121,15 @@ app.intent("events", conv => {
 
     return db.ref("events/").once("value", snapshot => {
         const data = snapshot.val();
-        for (let x in data){
+        for (let x in data) {
             events.push(`${data[x]["name"]}`);
 
         }
         conv.ask(`There are many events in technofest such as : ${events.toString()}.  \nClick below suggestions to know more.`);
         events.unshift('Quit');
         conv.ask(new Suggestions(events));
-        });
     });
+});
 
 //contact...............................................................................
 app.intent('contact', conv => {
@@ -125,16 +138,16 @@ app.intent('contact', conv => {
         text: `Feel free to contact us.  \n**swetank** : 7042435242  \n**Honey** : 9821443576`,
         title: 'Contact us',
         buttons: new Button({
-          title: 'Facebook',
-          url: 'https://www.facebook.com/technojam.scse/',
+            title: 'Facebook',
+            url: 'https://www.facebook.com/technojam.scse/',
         }),
         image: new Image({
-          url: 'https://www.efi.com/library/efi/images/banners/about_efi/contact_company_banner.jpg?h=280&w=980',
-          alt: 'Contact us',
+            url: 'https://www.efi.com/library/efi/images/banners/about_efi/contact_company_banner.jpg?h=280&w=980',
+            alt: 'Contact us',
         }),
         display: 'CROPPED',
-      }));
-      events.unshift('Quit');
+    }));
+    events.unshift('Quit');
     conv.ask(new Suggestions(events));
 });
 
@@ -148,7 +161,7 @@ app.intent('singleEvent', conv => {
         conv.ask(`Here's some detail about ${rawInput}`);
         conv.ask(new BasicCard({
             subtitle: `The event is on ${data["events"][id]["date"]}`,
-            text: `${data["events"][id]["description"]}  \n**venue** : ${data["events"][id]["venue"]}  \nThe Registration will end on ${data["events"][id]["registration_ends"]}`, 
+            text: `${data["events"][id]["description"]}  \n**venue** : ${data["events"][id]["venue"]}  \nThe Registration will end on ${data["events"][id]["registration_ends"]}`,
             title: `${data["events"][id]["name"]}`,
             display: 'CROPPED',
         }));
@@ -159,104 +172,104 @@ app.intent('singleEvent', conv => {
 
 
 app.intent("option", (conv, input, option) => {
-    if(option === 'events'){
+    if (option === 'events') {
         events = [];
         return db.ref("events/").once("value", snapshot => {
             const data = snapshot.val();
-            for (let x in data){
+            for (let x in data) {
                 events.push(`${data[x]["name"]}`);
-    
+
             }
             conv.ask(`There are many events in technofest such as : ${events.toString()}.  \nClick below suggestions to know more.`);
             events.unshift('Quit');
             conv.ask(new Suggestions(events));
-            });
-    }else if(option === 'contact'){
+        });
+    } else if (option === 'contact') {
         conv.ask("Here's our contact details.");
         conv.ask(new BasicCard({
             text: `Feel free to contact us.  \n**swetank** : 7042435242  \n**Honey** : 9821443576`,
             title: 'Contact us',
             buttons: new Button({
-              title: 'Facebook',
-              url: 'https://www.facebook.com/technojam.scse/',
+                title: 'Facebook',
+                url: 'https://www.facebook.com/technojam.scse/',
             }),
             image: new Image({
-              url: 'https://www.efi.com/library/efi/images/banners/about_efi/contact_company_banner.jpg?h=280&w=980',
-              alt: 'Contact us',
+                url: 'https://www.efi.com/library/efi/images/banners/about_efi/contact_company_banner.jpg?h=280&w=980',
+                alt: 'Contact us',
             }),
             display: 'CROPPED',
-          }));
-          events.unshift('Quit');
-          conv.ask(new Suggestions(events));
-    }else if(option === 'technojam'){
+        }));
+        events.unshift('Quit');
+        conv.ask(new Suggestions(events));
+    } else if (option === 'technojam') {
         return db.ref('about').once("value", snapshot => {
             const data = snapshot.val();
             conv.ask(new SimpleResponse({
                 speech: `${data["technojam"]["speech"]}`,
                 text: `${data["technojam"][`upperText`]}`,
-              }));
+            }));
             // Create a basic card
             conv.ask(new BasicCard({
                 text: `${data["technojam"]['text']}`,
                 subtitle: `${data["technojam"]['subtitle']}`,
                 title: `${data["technojam"]['title']}`,
                 buttons: new Button({
-                   title: 'Website',
-                   url: `${data["technojam"]['websiteUrl']}`,
+                    title: 'Website',
+                    url: `${data["technojam"]['websiteUrl']}`,
                 }),
                 image: new Image({
-                   url: `${data["technojam"]['imageUrl']}`,
-                   alt: `TechnoJam`,
+                    url: `${data["technojam"]['imageUrl']}`,
+                    alt: `TechnoJam`,
                 }),
                 display: 'CROPPED',
             }));
             suggest = ['Quit', 'Technofest', 'Events', 'Galgotias', 'Contact us'];
             conv.ask(new Suggestions(suggest));
-        }); 
-    } else if(option === 'technofest'){
+        });
+    } else if (option === 'technofest') {
         return db.ref('about').once("value", snapshot => {
             const data = snapshot.val();
             conv.ask(new SimpleResponse({
                 speech: `${data["technofest"]["speech"]}`,
                 text: `${data["technofest"][`upperText`]}`,
-              }));
+            }));
             // Create a basic card
             conv.ask(new BasicCard({
                 text: `${data["technofest"]['text']}`,
                 subtitle: `${data["technofest"]['subtitle']}`,
                 title: `${data["technofest"]['title']}`,
                 buttons: new Button({
-                   title: 'Website',
-                   url: `${data["technofest"]['websiteUrl']}`,
+                    title: 'Website',
+                    url: `${data["technofest"]['websiteUrl']}`,
                 }),
                 image: new Image({
-                   url: `${data["technofest"]['imageUrl']}`,
-                   alt: `Technofest`,
+                    url: `${data["technofest"]['imageUrl']}`,
+                    alt: `Technofest`,
                 }),
                 display: 'CROPPED',
             }));
             suggest = ['Quit', 'Events', 'Technojam', 'Galgotias', 'Contact us'];
             conv.ask(new Suggestions(suggest));
         });
-    } else if(option === 'galgotias'){
+    } else if (option === 'galgotias') {
         return db.ref('about').once("value", snapshot => {
             const data = snapshot.val();
             conv.ask(new SimpleResponse({
                 speech: `${data["galgotias"]["speech"]}`,
                 text: `${data["galgotias"][`upperText`]}`,
-              }));
+            }));
             // Create a basic card
             conv.ask(new BasicCard({
                 text: `${data["galgotias"]['text']}`,
                 subtitle: `${data["galgotias"]['subtitle']}`,
                 title: `${data["galgotias"]['title']}`,
                 buttons: new Button({
-                   title: 'Website',
-                   url: `${data["galgotias"]['websiteUrl']}`,
+                    title: 'Website',
+                    url: `${data["galgotias"]['websiteUrl']}`,
                 }),
                 image: new Image({
-                   url: `${data["galgotias"]['imageUrl']}`,
-                   alt: `Galgotias`,
+                    url: `${data["galgotias"]['imageUrl']}`,
+                    alt: `Galgotias`,
                 }),
                 display: 'CROPPED',
             }));
@@ -273,4 +286,3 @@ app.intent("option", (conv, input, option) => {
 
 
 exports.googleAction = functions.https.onRequest(app);
- 
